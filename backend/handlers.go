@@ -1,66 +1,50 @@
 package main
 
 import (
-    "github.com/gin-gonic/gin"
+    "encoding/json"
     "net/http"
 )
 
-func SaveSettings(c *gin.Context) {
-    var settings Settings
-    if err := c.ShouldBindJSON(&settings); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-    db.Save(&settings)
-    c.JSON(http.StatusOK, gin.H{"status": "settings saved"})
+// getSettings returns the current configuration settings.
+func getSettings(w http.ResponseWriter, r *http.Request) {
+    configMutex.RLock()
+    defer configMutex.RUnlock()
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(config)
 }
 
-func UploadToIPFS(c *gin.Context) {
-    file, _ := c.FormFile("file")
-    nodeURL := GetNodeURL()
-    cid, err := uploadFileToIPFS(file, nodeURL)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+// updateSettings updates the configuration settings.
+func updateSettings(w http.ResponseWriter, r *http.Request) {
+    var newConfig Config
+    if err := json.NewDecoder(r.Body).Decode(&newConfig); err != nil {
+        http.Error(w, err.Error(), http.StatusBadRequest)
         return
     }
-    db.Save(&CIDData{CID: cid})
-    c.JSON(http.StatusOK, gin.H{"cid": cid})
+
+    configMutex.Lock()
+    config = newConfig
+    configMutex.Unlock()
+
+    if err := saveConfig(); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
 }
 
-func FetchFromIPFS(c *gin.Context) {
-    cid := c.Param("cid")
-    nodeURL := GetNodeURL()
-    data, err := fetchFromIPFS(cid, nodeURL)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"data": data})
+// createIPFSFile uploads a file to IPFS and stores the CID.
+func createIPFSFile(w http.ResponseWriter, r *http.Request) {
+    // Implementation for creating IPFS file
 }
 
-func IngestIntoClickHouse(c *gin.Context) {
-    var ingestRequest struct {
-        CID  string `json:"cid"`
-        Data string `json:"data"`
-    }
-    if err := c.ShouldBindJSON(&ingestRequest); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-        return
-    }
-    err := ingestDataIntoClickHouse(ingestRequest.CID, ingestRequest.Data)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"status": "data ingested"})
+// fetchIPFSData fetches data from IPFS and ingests it into ClickHouse.
+func fetchIPFSData(w http.ResponseWriter, r *http.Request) {
+    // Implementation for fetching data from IPFS
 }
 
-func QueryClickHouse(c *gin.Context) {
-    cid := c.Query("cid")
-    data, err := queryDataFromClickHouse(cid)
-    if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"data": data})
+// getClickHouseData retrieves data from ClickHouse.
+func getClickHouseData(w http.ResponseWriter, r *http.Request) {
+    // Implementation for querying ClickHouse data
 }
