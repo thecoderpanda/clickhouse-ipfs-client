@@ -1,8 +1,0 @@
-{
-  "ipfs_node_url": "https://ipfs.io",
-  "ipfs_username": "",
-  "ipfs_password": "",
-  "clickhouse_url": "localhost:9000",
-  "clickhouse_user": "default",
-  "clickhouse_pass": ""
-}
