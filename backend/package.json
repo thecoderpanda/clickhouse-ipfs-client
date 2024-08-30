@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend for IPFS-ClickHouse integration",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "ipfs",
+    "clickhouse",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clickhouse/client": "^1.5.0",
+    "@helia/unixfs": "^3.0.7",
+    "body-parser": "^1.20.2",
+    "event-target-shim": "^6.0.2",
+    "express": "^4.19.2",
+    "helia": "^4.2.5",
+    "multer": "^1.4.5-lts.1",
+    "multiformats": "^13.2.2",
+    "sqlite": "^5.0.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}
